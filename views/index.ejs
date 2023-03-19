@@ -4,6 +4,13 @@
         <title>Messages</title>
     </head>
     <body>
-        <p>Data from backend: <%= message %> </p>
+        <h1>Messages</h1>
+        <p>Message: <%= message %> </p>
+        <form action="/msg/" method="post">
+            <label for="message">Message: </label>
+            <input type="text" name="message" id="message" placeholder="Message...">
+            <input type="submit" value="Submit">
+        </form>
+
     </body>
 </html>
