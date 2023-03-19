@@ -7,14 +7,15 @@ var urlencoder = bodyParser.urlencoded({ extended: false });
 
 app.set("view engine", "ejs");
 
-var msg = "Backend Message!!!";
+//var msg = "Backend Message!!!";
+var msg = ["Pusta lista"];
 
 app.get("/", function (req, res) {
-  res.render("index", { message: msg });
+  res.render("index", { titles: msg });
 });
 
-app.post("/msg", urlencoder, function (req, res) {
-  msg = req.body.message;
+app.post("/titles", urlencoder, function (req, res) {
+  msg.push(req.body.title);
   res.redirect("/");
 });
 
