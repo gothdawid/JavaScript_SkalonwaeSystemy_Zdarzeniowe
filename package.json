@@ -4,11 +4,15 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "test": "dev"
+    "test": "node helloworld.js",
+    "dev": "nodemon helloworld.js"
   },
   "author": "Dawid Studziński",
   "license": "ISC",
   "dependencies": {
     "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.21"
   }
 }
