@@ -2,8 +2,12 @@ const http = require("http");
 const express = require("express");
 const app = express();
 
-app.get("/", (req, res) => {
-  res.send("Hello World!");
+app.set("view engine", "ejs");
+
+var msg = "Backend Message!!!";
+
+app.get("/", function (req, res) {
+  res.render("index", { message: msg });
 });
 
 const server = http.createServer(app);
