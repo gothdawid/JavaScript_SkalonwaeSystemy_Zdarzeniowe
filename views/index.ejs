@@ -5,15 +5,44 @@
     </head>
     <body>
         <h1>Tytuły:</h1>
-        <ul>
-            <% for(var i = 0; i < titles.length; i++) { %>
-                <li><%= titles[i] %></li>
+        <table border="1px" cellspacing="0" cellpadding="5px">
+            <tr>
+                <th>Tytuł</th>
+                <th>Autor</th>
+                <th>Usuń</th>
+            </tr>
+            <!-- If list is empty -->
+            <% if (titles.length <= 0) { %>
+                <tr>
+                    <td colspan="3">Brak tytułów</td>
+                </tr>
             <% } %>
+            <% for (let i = 0; i < titles.length; i++) { %>
+                <tr>
+                    <td><%= titles[i].title %></td>
+                    <td><%= titles[i].author %></td>
+                    <td>
+                        <form action="/titles/" method="post">
+                            <input type="hidden" name="method" value="delete">
+                            <input type="hidden" name="id" value="<%=i %>">
+                            <input type="submit" value="Delete">
+                        </form>
+                    </td>
+                </tr>
+            <% } %>
+        </table>
+        <br />
         <form action="/titles/" method="post">
             <label for="title">Title: </label>
             <input type="text" name="title" id="title" placeholder="Title...">
+            <label for="author">Author: </label>
+            <input type="text" name="author" id="author" placeholder="Author...">
             <input type="submit" value="Submit">
         </form>
-
+        
+        <!-- Error from backend -->
+        <% if (error) { %>
+            <p><%= error %></p>
+        <% } %>
     </body>
 </html>
