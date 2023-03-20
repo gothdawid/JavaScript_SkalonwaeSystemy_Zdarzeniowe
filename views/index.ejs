@@ -9,7 +9,7 @@
             <tr>
                 <th>Tytuł</th>
                 <th>Autor</th>
-                <th>Usuń</th>
+                <th>Akcja</th>
             </tr>
             <!-- If list is empty -->
             <% if (titles.length <= 0) { %>
@@ -23,10 +23,16 @@
                     <td><%= titles[i].author %></td>
                     <td>
                         <form action="/titles/" method="post">
+                            <input type="hidden" name="method" value="edit">
+                            <input type="hidden" name="id" value="<%=titles[i]._id %>">
+                            <input type="submit" value="Edit">
+                        </form>
+                        <form action="/titles/" method="post">
                             <input type="hidden" name="method" value="delete">
-                            <input type="hidden" name="id" value="<%=i %>">
+                            <input type="hidden" name="id" value="<%=titles[i]._id %>">
                             <input type="submit" value="Delete">
                         </form>
+
                     </td>
                 </tr>
             <% } %>
