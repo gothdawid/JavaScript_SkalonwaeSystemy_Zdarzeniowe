@@ -22,6 +22,7 @@ var PersonModelSchema = new Schema({
 
 var BookModelSchema = new Schema({
   title: String,
+  author: PersonModelSchema
 });
 
 // Compile model from schema
@@ -43,11 +44,25 @@ app.get("/", async function (req, res) {
 
 app.post("/titles", urlencoder, async function (req, res) {
   console.log(req.body);
-  if (req.body.method == "delete") {
-    //BooksList.splice(req.body.id, 1);
-    var ret = await BookModel.findOneAndRemove({ _id: req.body.id });
-    console.log(ret);
-  } else if (
+  if (req.body.action == "Delete") {
+    var ret = await BookModel.findOneAndRemove({ _id: req.body.title_id });
+    //console.log(ret);
+  } 
+  else if(req.body.action == "Edit") {
+    var person = await PersonModel.findOneAndUpdate(
+      {_id: req.body.author_id},
+      {
+        firstName: req.body.old_author.split(" ")[0],
+        lastName: req.body.old_author.split(" ")[1]
+      })
+    var ret = await BookModel.findOneAndUpdate(
+      {_id: req.body.title_id},
+      {
+        title: req.body.old_title,
+        author: person
+      })
+  } 
+  else if (
     req.body.title == "" ||
     req.body.title == null ||
     req.body.author == "" ||
@@ -57,9 +72,21 @@ app.post("/titles", urlencoder, async function (req, res) {
     res.redirect("/");
     return;
   } else {
-    // var person = new PersonModel({ firstName: "John", lastName: "Doe", age: 26 });
-    var book = new BookModel({ title: req.body.title });
+    var tmp = req.body.author.split(" ")
+    var fN = tmp[0]
+    var lN = tmp[1]
 
+    var person = await PersonModel.findOne({firstName: fN, lastName: lN})
+    if (person == null || person == "") {
+      person = new PersonModel({ firstName: fN, lastName: lN });
+    }
+
+    var book = new BookModel({ 
+      title: req.body.title,
+      author: person
+    });
+
+    person.save();
     book.save();
   }
   res.redirect("/");
