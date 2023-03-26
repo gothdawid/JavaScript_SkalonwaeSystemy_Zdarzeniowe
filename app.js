@@ -42,6 +42,61 @@ app.get("/", async function (req, res) {
   error = "";
 });
 
+app.get("/api", urlencoder, async function (req, res) {
+  BooksList = await BookModel.find();
+  res.send(BooksList)
+})
+app.post("/api", urlencoder, async function (req, res) {
+  var person = await PersonModel.findOneAndUpdate(
+    {_id: req.body.author_id},
+    {
+      firstName: req.body.old_author.split(" ")[0],
+      lastName: req.body.old_author.split(" ")[1]
+    })
+  var ret = await BookModel.findOneAndUpdate(
+    {_id: req.body.title_id},
+    {
+      title: req.body.old_title,
+      author: person
+    })
+    res.send(ret)
+})
+app.put("/api", urlencoder, async function (req, res) {
+  console.log(req.query)
+  if (
+    req.query.title == "" ||
+    req.query.title == null ||
+    req.query.author == "" ||
+    req.query.author == null
+  ) {
+    res.send("Pole nie może być puste")
+  } 
+  else {
+    var tmp = req.query.author.split(" ")
+    var fN = tmp[0]
+    var lN = tmp[1]
+
+    var person = await PersonModel.findOne({firstName: fN, lastName: lN})
+    if (person == null || person == "") {
+      person = new PersonModel({ firstName: fN, lastName: lN });
+    }
+
+    var book = new BookModel({ 
+      title: req.query.title,
+      author: person
+    });
+
+    person.save();
+    book.save();
+    res.send(book);
+  }
+})
+app.delete("/api", urlencoder, async function (req, res) {
+  return await BookModel.findOneAndRemove({ _id: req.body.title_id });
+})
+
+
+
 app.post("/titles", urlencoder, async function (req, res) {
   console.log(req.body);
   if (req.body.action == "Delete") {
