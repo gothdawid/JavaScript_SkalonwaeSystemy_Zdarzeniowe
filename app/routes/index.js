@@ -3,6 +3,7 @@ const bodyParser = require("body-parser");
 
 const author = require("./author");
 const book = require("./book");
+const front = require("./front");
 
 routes.use(bodyParser.urlencoded({ extended: true }));
 routes.use(bodyParser.json());
@@ -21,5 +22,6 @@ routes.get("/", (req, res) => {
 
 routes.use("/author", author);
 routes.use("/book", book);
+routes.use("/front", front);
 
 module.exports = routes;
