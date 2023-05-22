@@ -15,12 +15,10 @@ const AuthorSchema = new Schema(
       type: Number,
       required: [true, "can't be null"],
     },
-    Books: [
-      {
+    Books: [{
         type: Schema.Types.ObjectId,
         ref: "Book",
-      },
-    ],
+    }],
   },
   { timestamps: true }
 );

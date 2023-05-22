@@ -12,3 +12,12 @@ mongoose.connection.on('connected', () => {
     mongoose.model('Author', AuthorSchema)
     mongoose.model('Book', BookSchema)
 })
+
+mongoose.connection.on('error', (err) => {
+    console.log(`Mongoose default connection error: ${err}`)
+})
+
+mongoose.connection.on('disconnected', () => {
+    console.log('Mongoose default connection disconnected')
+})
+

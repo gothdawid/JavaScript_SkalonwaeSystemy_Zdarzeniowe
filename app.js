@@ -7,10 +7,12 @@ const express = require("express"),
   fs = require("fs"),
   YAML = require("yaml"),
   routes = require("./app/routes");
+  cors = require("cors");
 
 const app = express();
 const port = process.env.PORT || 8000;
 
+app.use(cors());
 app.use("/", routes);
 
 const file = fs.readFileSync("./config/apiSwagger.yml", "utf8");

@@ -4,10 +4,21 @@ module.exports = async (req, res, next) => {
   const BookModel = mongoose.model("Book");
   const AuthorModel = mongoose.model("Author");
 
+  //check if author exists
+  const author = await AuthorModel.findOne({ _id: req.body.author });
+
+  if (!author) {
+    res.status(400).json({
+      success: false,
+      message: "Author not found",
+    });
+    return;
+  }
+
   const NewBook = new BookModel({
     title: req.body.title,
     year: req.body.year,
-    author: req.body.author,
+    author: author
   });
 
   NewBook.save()
@@ -27,7 +38,4 @@ module.exports = async (req, res, next) => {
     });
 
     //append Book to Author books list
-
-    
-
 };

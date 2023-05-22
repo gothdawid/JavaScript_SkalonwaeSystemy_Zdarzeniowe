@@ -7,9 +7,198 @@
                     <h1>
                         <%= title %>
                     </h1>
-                    <p>Witaj na stronie głównej</p>
+                </div>
+            </div>
+            <!-- book details if requested by user button, default hidden-->
+            <!-- add button to close details -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="alert alert-primary" role="role" id="bookDetails" style="display: none;">
+                        <h4 class="alert-heading">Szczegóły książki</h4>
+                        <hr>
+                        <div class="row">
+                            <div class="col-12">
+                                <p>Tytuł: <span id="bookTitle"></span></p>
+                                <p>Autor: <span id="bookAuthor"></span></p>
+                                <p>Rok wydania: <span id="bookYear"></span></p>
+                            </div>
+                        </div>
+                        <hr>
+                        <button type="button" class="btn btn-primary" id="closeDetails">Zamknij</button>
+                    </div>
+                </div>
+                <script>
+                    function getBookDetails(id) {
+                        $.ajax({
+                            url: "http://localhost:8000/book/" + id,
+                            dataType: "json",
+                            success: function (data) {
+                                $('#bookTitle').text(data.data.title);
+                                $('#bookAuthor').text(data.data.author.firstName + ' ' + data.data.author.lastName);
+                                $('#bookYear').text(data.data.year);
+                                $('#bookDescription').text(data.data.description);
+                                $('#bookDetails').show();
+                            }
+                        });
+                    }
+                    $(document).ready(function () {
+                        $('#closeDetails').click(function () {
+                            $('#bookDetails').hide();
+                        });
+                    });
+                </script>
+            </div>
+
+            <!-- get books list  -->
+            <div class="row">
+                <div class="col-12">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Tytuł</th>
+                                <th>Autor</th>
+                                <th>Rok wydania</th>
+                                <th>Akcja</th>
+                            </tr>
+                        </thead>
+                        <tbody id="books">
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
+        <h1>
+            Dodaj książkę
+        </h1>
+        <div class="row bg-light">
+            <!-- formularz z danymi nową ksiązkę -->
+            <!-- każdy input ma być w jednej lini -->
+            <!-- inputy: tytuł, autor, rok wydania -->
+
+            <form id="addBookForm" class="row g-3">
+                <div class="col-md-6">
+                    <label for="inputTitle" class="form-label">Tytuł</label>
+                    <input type="text" class="form-control" id="inputTitle">
+                </div>
+                <div class="col-md-6">
+                    <label for="inputAuthor" class="form-label">Autor</label>
+                    <select id="BookinputAuthor" class="form-select"></select>
+                </div>
+                <div class="col-md-6">
+                    <label for="inputYear" class="form-label">Rok wydania</label>
+                    <input type="text" class="form-control" id="inputYear">
+                </div>
+                <div class="col-md-6">
+                    <button type="submit" class="btn btn-primary">Dodaj</button>
+                </div>
+            </form>
+            <script>
+                // get authors list function
+                function getAuthors() {
+                    $.ajax({
+                        url: "http://localhost:8000/author",
+                        dataType: "json",
+                        success: function (data) {
+                            var authors = '';
+                            $.each(data.data, function (key, value) {
+                                authors += '<option value="' + value._id + '">' + value.firstName + ' ' + value.lastName + '</option>';
+                            });
+                            $('#BookinputAuthor').append(authors);
+                        }
+                    });
+                }
+                $(document).ready(function () {
+                    getAuthors();
+                });
+
+
+                // add new book
+                $('#addBookForm').submit(function (event) {
+                    event.preventDefault();
+                    var title = $('#inputTitle').val();
+                    var author = $('#BookinputAuthor').val();
+                    var year = $('#inputYear').val();
+                    $.ajax({
+                        url: "http://localhost:8000/book",
+                        method: "POST",
+                        dataType: "json",
+                        data: {
+                            title: title,
+                            author: author,
+                            year: year
+                        },
+                        success: function (data) {
+                            getBooks();
+                        }
+                    });
+                });
+
+            </script>
+        </div>
+
+
+
+        <script>
+            function getBooks() {
+                $.ajax({
+                    url: "http://localhost:8000/book",
+                    dataType: "json",
+                    success: function (data) {
+                        var books = '';
+                        $.each(data.data, function (key, value) {
+                            books += '<tr>';
+                            books += '<td><input class="form-control" type="text" id="title' + value._id + '" value="' + value.title + '"></td>';
+                            books += '<td><input class="form-control" type="text" id="author' + value._id + '" value="' + value.author.firstName + " " + value.author.lastName + '"></td>';
+                            books += '<td><input class="form-control" type="text" id="year' + value._id + '" value="' + value.year + '"></td>';
+                            books += '<td><button type="button" class="btn btn-primary" onclick="updateBook(\'' + value._id + '\')">Zapisz</button></td>';
+                            books += '<td><button type="button" class="btn btn-primary" onclick="deleteBook(\'' + value._id + '\')">Usuń</button></td>';
+                            books += '<td><button type="button" class="btn btn-primary" onclick="getBookDetails(\'' + value._id + '\')">Szczegóły</button></td>';
+                            books += '</tr>';
+                        });
+                        // remove all rows from tbody tag
+                        $('#books').empty();
+                        $('#books').append(books);
+                    }
+                });
+            }
+            $(document).ready(function () {
+                getBooks();
+            });
+
+            // delete book with a confirmation dialog
+            function deleteBook(id) {
+                var result = confirm("Czy na pewno chcesz usunąć książkę?");
+                if (result) {
+                    $.ajax({
+                        url: "http://localhost:8000/book/" + id,
+                        method: "DELETE",
+                        dataType: "json",
+                        success: function (data) {
+                            getBooks();
+                        }
+                    });
+                }
+            }
+
+            // update book
+            function updateBook(id) {
+                var title = $('#title' + id).val();
+                var author = $('#author' + id).val();
+                var year = $('#year' + id).val();
+                $.ajax({
+                    url: "http://localhost:8000/book/" + id,
+                    method: "PUT",
+                    dataType: "json",
+                    data: {
+                        title: title,
+                        author: author,
+                        year: year
+                    },
+                    success: function (data) {
+                        getBooks();
+                    }
+                });
+            }
+        </script>
 
         <%- include('partials/footer') %>

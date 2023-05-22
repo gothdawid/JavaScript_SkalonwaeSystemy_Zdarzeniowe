@@ -7,9 +7,215 @@
                     <h1>
                         <%= title %>
                     </h1>
-                    <p>Witaj na stronie głównej</p>
                 </div>
             </div>
+
+
+            <!-- <div class="row">
+                <div class="col-12">
+                    <div class="alert alert-primary" role="alert" id="message">
+                        <h4 class="alert-heading">Komunikat</h4>
+                        <hr>
+                        <div class="row">
+                            <div class="col-12">
+                                <p id="messageText"></p>
+                            </div>
+                        </div>
+                        <hr>
+                        <button type="button" class="btn btn-primary" onclick="$('#message').hide()">Zamknij</button>
+                    </div>
+                </div>
+            </div> -->
+
+            <!-- author details if requested by user button, default hidden-->
+            <!-- add button to close details -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="alert alert-primary" role="alert" id="authorDetails" style="display: none;">
+                        <h4 class="alert-heading">Szczegóły autora</h4>
+                        <hr>
+                        <div class="row">
+                            <div class="col-12">
+                                <p>Imię: <span id="authorFirstName"></span></p>
+                                <p>Nazwisko: <span id="authorLastName"></span></p>
+                                <p>Wiek: <span id="authorAge"></span></p>
+                                <p>Książki: <span id="authorBooks"></span></p>
+                            </div>
+                        </div>
+                        <hr>
+                        <button type="button" class="btn btn-primary" id="closeDetails">Zamknij</button>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- get author list (jquerry) -->
+            <div class="row">
+                <div class="col-12">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Imię</th>
+                                <th>Nazwisko</th>
+                                <th>Wiek</th>
+                                <th>Wydane książki</th>
+                                <th>Akcja</th>
+                            </tr>
+                        </thead>
+                        <tbody id="authors">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <h1>
+                Dodaj autora
+            </h1>
+            <div class="row bg-light">
+                <!-- formularz z danymi nowego autora -->
+                <!-- jaży input ma być w jednej lini -->
+                <form id="addAuthorForm" class="row g-3">
+                    <div class="col-3">
+                        <input class="form-control" type="text" id="firstName" placeholder="Imię">
+                    </div>
+                    <div class="col-3">
+                        <input class="form-control" type="text" id="lastName" placeholder="Nazwisko">
+                    </div>
+                    <div class="col-2">
+                        <input class="form-control" type="text" id="age" placeholder="Wiek">
+                    </div>
+                    <div class="col-2">
+                        <select class="form-control" id="NewAuthorBooks" multiple>
+                        </select>
+                    </div>
+                    <div class="col-2">
+                        <button type="button" class="btn btn-primary" onclick="addAuthor()">Dodaj</button>
+                    </div>
+                </form>
+            </div>
         </div>
+        <script>
+            function getBooks(authorId) {
+                $.ajax({
+                    url: "http://localhost:8000/book",
+                    dataType: "json",
+                    success: function (data) {
+                        var books = '';
+                        $.each(data.data, function (key, value) {
+                            books += '<option value="' + value._id + '">' + value.title + '</option>';
+                        });
+                        // clear books list
+                        $('#NewAuthorBooks' + authorId).empty();
+                        $('#NewAuthorBooks' + authorId).append(books);
+                    }
+                });
+            }
+
+            $(document).ready(function () {
+                getAuthors();
+                getBooks();
+                $('#closeDetails').click(function () {
+                    $('#authorDetails').hide();
+                });
+            });
+
+            function getAuthorDetails(id) {
+                $.ajax({
+                    url: "http://localhost:8000/author/" + id,
+                    dataType: "json",
+                    success: function (data) {
+                        $('#authorFirstName').text(data.data.firstName);
+                        $('#authorLastName').text(data.data.lastName);
+                        $('#authorAge').text(data.data.age);
+                        $('#authorBooks').text(data.data.books);
+                        $('#authorDetails').show();
+                    }
+                });
+            }
+
+            function updateAuthor(id) {
+                var firstName = $('#firstName' + id).val();
+                var lastName = $('#lastName' + id).val();
+                var age = $('#age' + id).val();
+                var books = $('#books' + id).val();
+                $.ajax({
+                    url: "http://localhost:8000/author/" + id,
+                    dataType: "json",
+                    type: "PUT",
+                    data: {
+                        firstName: firstName,
+                        lastName: lastName,
+                        age: age,
+                        books: books
+                    },
+                    success: function (data) {
+                        location.reload();
+                    }
+                });
+            }
+
+            function deleteAuthor(id) {
+                $.ajax({
+                    url: "http://localhost:8000/author/" + id,
+                    dataType: "json",
+                    type: "DELETE",
+                    success: function (data) {
+                        location.reload();
+                    }
+                });
+            }
+
+            function getAuthors() {
+                $(document).ready(function () {
+                    $.ajax({
+                        url: "http://localhost:8000/author",
+                        dataType: "json",
+                        success: function (data) {
+                            var authors = '';
+                            $.each(data.data, function (key, value) {
+                                authors += '<tr>';
+                                authors += '<td><input class="form-control" type="text" id="firstName' + value._id + '" value="' + value.firstName + '"></td>';
+                                authors += '<td><input class="form-control" type="text" id="lastName' + value._id + '" value="' + value.lastName + '"></td>';
+                                authors += '<td><input class="form-control" type="text" id="age' + value._id + '" value="' + value.age + '"></td>';
+                                authors += '<td><select class="form-control" name="bookslist" id="books' + value._id + '" multiple> </select></td>';
+
+                                authors += '<td>';
+                                authors += '<button onclick="getAuthorDetails(\'' + value._id + '\')" class="btn btn-primary">Szczegóły</button>';
+                                authors += '<button onclick="updateAuthor(\'' + value._id + '\')" class="btn btn-primary">Zapisz</button>';
+                                authors += '<button onclick="deleteAuthor(\'' + value._id + '\')" class="btn btn-primary">Usuń</button>';
+                                authors += '</td>';
+                                authors += '</tr>';
+
+                                // get books list for each author
+
+
+                            });
+                            $('#authors').append(authors);
+                        }
+                    });
+                });
+            }
+
+            function addAuthor() {
+                var firstName = $('#firstName').val();
+                var lastName = $('#lastName').val();
+                var age = $('#age').val();
+                var books = $('#NewAuthorBooks').val();
+                $.ajax({
+                    url: "http://localhost:8000/author",
+                    dataType: "json",
+                    type: "POST",
+                    data: {
+                        firstName: firstName,
+                        lastName: lastName,
+                        age: age,
+                        books: books
+                    },
+                    success: function (data) {
+                        location.reload();
+                    }
+                });
+
+            }
+        </script>
 
         <%- include('partials/footer') %>
